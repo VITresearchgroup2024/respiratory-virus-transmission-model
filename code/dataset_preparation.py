@@ -11,7 +11,8 @@ def load_metadata(csv_file):
 # ------------------ Function 2 ------------------
 def load_sequences(fasta_file):
     sequences = list(SeqIO.parse(fasta_file, "fasta"))
-    sequence_data = [{"ID": record.id, "Sequence": str(record.seq), "Length": len(record.seq)} for record in sequences]
+    # Column renamed to Protein_Sequence
+    sequence_data = [{"ID": record.id, "Protein_Sequence": str(record.seq), "Length": len(record.seq)} for record in sequences]
     return pd.DataFrame(sequence_data)
 
 # ------------------ Function 3 ------------------
@@ -35,17 +36,12 @@ def load_host_mapping_csv(mapping_file):
 
 # ------------------ Function 7 ------------------
 def map_host_to_agg_with_mapping(df, host_col, target_col, mapping_df):
-    """
-    Map Host to Host_agg using mapping dataframe.
-    If Host is NaN, assign 'unknown host'.
-    If Host is not found in mapping, leave as NaN.
-    """
     mapping_dict = mapping_df.set_index('Host')['Host_agg'].to_dict()
     
     def map_host(host):
         if pd.isna(host):
-            return "unknown host"  # only for blank hosts
-        return mapping_dict.get(host, pd.NA)  # keep NaN if not found in mapping
+            return "unknown host"
+        return mapping_dict.get(host, pd.NA)
     
     df[target_col] = df[host_col].apply(map_host)
     return df
@@ -57,28 +53,21 @@ def add_human_column(df, host_col, human_col):
 
 # ------------------ Function 9 ------------------
 def drop_duplicates_on_sequence(df):
-    return df.drop_duplicates(subset=['Sequence'])
+    return df.drop_duplicates(subset=['Protein_Sequence'])
 
 # ------------------ Function 10 ------------------
 def load_codon_usage(json_path):
-    """Load codon usage table from JSON file."""
     with open(json_path, "r") as f:
         return json.load(f)
 
 # ------------------ Function 11 ------------------
-def reverse_translate_protein(df, seq_col, species_col, codon_usage_dict, new_col="Reverse_Translated_DNA"):
-    """
-    Reverse translate protein sequences into DNA using species-specific codon usage.
-    If species not found, fallback to 'default' codon table.
-    Handles weighted probabilities or flat codon lists.
-    """
+def reverse_translate_protein(df, seq_col, species_col, codon_usage_dict, new_col="Reverse_Translated_genome"):
     dna_sequences = []
 
     for _, row in df.iterrows():
         protein_seq = str(row[seq_col]).upper()
         species = str(row[species_col])
 
-        # Handle missing or unknown virus species
         if species not in codon_usage_dict:
             if "default" in codon_usage_dict:
                 codon_table = codon_usage_dict["default"]
@@ -93,7 +82,6 @@ def reverse_translate_protein(df, seq_col, species_col, codon_usage_dict, new_co
             if aa in codon_table:
                 codon_info = codon_table[aa]
 
-                # Handle weighted or list format
                 if isinstance(codon_info, dict):
                     codons = list(codon_info.keys())
                     weights = list(codon_info.values())
@@ -119,14 +107,12 @@ if __name__ == "__main__":
     csv_files = ["./sequences.csv"]
     fasta_files = ["./sequences.fasta"]
     mapping_file = "./host_mapping.csv"
-    codon_usage_file = "./codon_usage.json"  # JSON file path
+    codon_usage_file = "./codon_usage.json"
 
     if len(csv_files) != len(fasta_files):
         raise ValueError("The number of CSV files must match the number of FASTA files.")
 
-    # Load codon usage JSON once
     codon_usage_dict = load_codon_usage(codon_usage_file)
-
     all_data_frames = []
 
     for csv_file, fasta_file in zip(csv_files, fasta_files):
@@ -145,7 +131,6 @@ if __name__ == "__main__":
 
         host_mapping_df = load_host_mapping_csv(mapping_file)
 
-        # Map host to aggregated host column
         df_host_mapped = map_host_to_agg_with_mapping(
             df_col_removed,
             host_col='Host',
@@ -153,24 +138,19 @@ if __name__ == "__main__":
             mapping_df=host_mapping_df
         )
 
-        # Add human column
         df_human_added = add_human_column(df_host_mapped, host_col='Host_agg', human_col='Human')
-
         all_data_frames.append(df_human_added)
 
-    # Merge all datasets
     all_df_merged = pd.concat(all_data_frames, ignore_index=True)
     final_cleaned_df = drop_duplicates_on_sequence(all_df_merged)
 
-    # Reverse translate protein sequences
     final_translated_df = reverse_translate_protein(
         final_cleaned_df,
-        seq_col="Sequence",
-        species_col="Genus",  # adjust column if needed
+        seq_col="Protein_Sequence",
+        species_col="Genus",
         codon_usage_dict=codon_usage_dict
     )
 
-    # Save final curated dataset
-    output_file = "influenzaA_curated_dataset.csv"
+    output_file = "curated_dataset.csv"
     final_translated_df.to_csv(output_file, index=False)
     print(f" Data processing completed. Cleaned and reverse-translated data saved to {output_file}.")
