@@ -6,7 +6,7 @@ from sklearn.metrics import classification_report, roc_auc_score, confusion_matr
 from sklearn.feature_selection import SelectKBest, chi2
 
 # Load dataset
-df = pd.read_csv("./influenzaA_virus.csv")
+df = pd.read_csv("./data.csv")
 df = df.dropna(subset=["Reverse_Translated_genome", "Human", "Species", "Family", "Host_agg"])
 
 X_dna = df["Reverse_Translated_genome"].astype(str)
