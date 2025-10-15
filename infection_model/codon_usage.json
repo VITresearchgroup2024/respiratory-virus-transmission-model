@@ -45,33 +45,10 @@
     "R": ["AGA"],
     "G": ["GGA"],
     "*": ["UAA", "UAG", "UGA"]
-  },
-
-  "Gammainfluenzavirus" : {
-    "F": ["UUU"],
-    "L": ["CUG"],
-    "I": ["AUU"],
-    "M": ["AUG"],
-    "V": ["GUU"],
-    "S": ["UCA"],
-    "P": ["CCU"],
-    "T": ["ACU"],
-    "A": ["GCU"],
-    "Y": ["UAU"],
-    "H": ["CAU"],
-    "Q": ["CAA"],
-    "N": ["AAU"],
-    "K": ["AAA"],
-    "D": ["GAU"],
-    "E": ["GAA"],
-    "C": ["UGU"],
-    "W": ["UGG"],
-    "R": ["AGA"],
-    "G": ["GGA"],
-    "*": ["UAA", "UAG", "UGA"]
-  },
+  }
 
 }
+
 
 
 
