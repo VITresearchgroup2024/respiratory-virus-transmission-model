@@ -1,1 +1,1 @@
-infection and transmission model for respirotory virus
+infection and transmission model for respiratory virus
