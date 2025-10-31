@@ -69,10 +69,10 @@ def drop_duplicates_on_sequence(df):
 
 # ------------------------- MAIN SCRIPT -----------------------------
 if __name__ == "__main__":
-    csv_files = ["C:/Users/vinni/Downloads/respiratory-virus-transmission-model/data/demo_data/metadata.csv"]
-    fasta_files = ["C:/Users/vinni/Downloads/respiratory-virus-transmission-model/data/demo_data/protein.fasta"]
-    nucleotide_fastas = ["C:/Users/vinni/Downloads/respiratory-virus-transmission-model/data/demo_data/genome.fasta"]  # nucleotide FASTA file
-    mapping_file = "C:/Users/vinni/Downloads/respiratory-virus-transmission-model/data/host_mapping.csv"
+    csv_files = ["./metadata.csv"]
+    fasta_files = ["./protein.fasta"]
+    nucleotide_fastas = ["./genome.fasta"]  # nucleotide FASTA file
+    mapping_file = "./host_mapping.csv"
 
     if len(csv_files) != len(fasta_files):
         raise ValueError("The number of CSV files must match the number of FASTA files.")
@@ -107,6 +107,6 @@ if __name__ == "__main__":
     final_cleaned_df = drop_duplicates_on_sequence(all_df_merged)
 
     # ---------------- Save Final Output ----------------
-    output_file = "curated_dataset.csv" # can edit file name
+    output_file = "./curated_dataset.csv" # can edit file name
     final_cleaned_df.to_csv(output_file, index=False)
     print(f"Data processing completed. Cleaned data with protein and nucleotide sequences saved to {output_file}.")
